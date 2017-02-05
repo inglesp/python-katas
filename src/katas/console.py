@@ -2,6 +2,11 @@ from code import compile_command
 import sys
 import traceback
 
+try:
+    import readline
+except ImportError:
+    pass
+
 
 def interact(locals_, target):
     while True:
@@ -19,15 +24,20 @@ def interact(locals_, target):
 
             try:
                 if eval('_') == target:
-                    return
+                    return True
             except NameError:
                 pass
 
         except EOFError:
             print()
-            break
+            sys.exit()
         except KeyboardInterrupt:
-            print('\nKeyboardInterrupt')
+            if buffer:
+                print('\nKeyboardInterrupt')
+            else:
+                print()
+                return False
+
 
 def run_source(source, locals_):
     try:
@@ -40,7 +50,7 @@ def run_source(source, locals_):
         return False
 
     try:
-        exec(code, locals_)
+        exec(code, globals(), locals_)
     except SystemExit:
         raise
     except:
@@ -48,10 +58,12 @@ def run_source(source, locals_):
 
     return True
 
+
 def show_syntax_error():
     etype, value, tb = sys.exc_info()
     lines = traceback.format_exception_only(etype, value)
     print(''.join(lines))
+
 
 def show_traceback():
     etype, value, tb = sys.exc_info()
